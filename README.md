@@ -1,6 +1,8 @@
 
 ## Project Overview
 
+[![codecov](https://codecov.io/gh/Practica-Supervisada-UCR-2025/Backend-MS-Notifications/graph/badge.svg?token=KBP1Y02E1F)](https://codecov.io/gh/Practica-Supervisada-UCR-2025/Backend-MS-Notifications)
+
 This microservice handles all notification-related functionality, including sending emails such as password recovery messages.
 
 
