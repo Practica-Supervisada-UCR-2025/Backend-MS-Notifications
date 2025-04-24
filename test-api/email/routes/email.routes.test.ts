@@ -52,3 +52,83 @@ describe('POST /api/email/send-password-reset', () => {
     expect(response.body).toEqual({ message: 'Failed to send email' });
   });
 });
+
+describe('POST /api/email/send-register-confirmation', () => {
+  const mockSendConfirmation = emailService.sendConfirmationRegister as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should return 200 and success message for mobile user registration', async () => {
+    mockSendConfirmation.mockResolvedValue(undefined);
+
+    const response = await request(app)
+      .post('/api/email/send-register-confirmation')
+      .send({
+        email: 'test@example.com',
+        full_name: 'Test User',
+        userType: 'mobile'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ message: 'Email sent successfully!' });
+    expect(mockSendConfirmation).toHaveBeenCalledWith({
+      email: 'test@example.com',
+      full_name: 'Test User',
+      userType: 'mobile'
+    });
+  });
+
+  it('should return 200 and success message for web admin registration', async () => {
+    mockSendConfirmation.mockResolvedValue(undefined);
+
+    const response = await request(app)
+      .post('/api/email/send-register-confirmation')
+      .send({
+        email: 'admin@example.com',
+        full_name: 'Admin User',
+        userType: 'web'
+      });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual({ message: 'Email sent successfully!' });
+    expect(mockSendConfirmation).toHaveBeenCalledWith({
+      email: 'admin@example.com',
+      full_name: 'Admin User',
+      userType: 'web'
+    });
+  });
+
+  it('should return 400 if required fields are missing', async () => {
+    const testCases = [
+      { email: 'test@example.com', full_name: 'Test User' }, // missing userType
+      { email: 'test@example.com', userType: 'mobile' }, // missing full_name
+      { full_name: 'Test User', userType: 'mobile' }, // missing email
+    ];
+
+    for (const testCase of testCases) {
+      const response = await request(app)
+        .post('/api/email/send-register-confirmation')
+        .send(testCase);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ message: 'Missing required fields' });
+    }
+  });
+
+  it('should return 500 if email service throws', async () => {
+    mockSendConfirmation.mockRejectedValue(new Error('SMTP fail'));
+
+    const response = await request(app)
+      .post('/api/email/send-register-confirmation')
+      .send({
+        email: 'test@example.com',
+        full_name: 'Test User',
+        userType: 'mobile'
+      });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ message: 'Failed to send email' });
+  });
+});

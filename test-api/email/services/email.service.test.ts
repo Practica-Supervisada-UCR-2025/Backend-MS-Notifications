@@ -1,7 +1,9 @@
-import { sendPasswordResetEmail } from '../../../src/features/notifications/email/services/email.service';
+import { sendPasswordResetEmail, sendConfirmationRegister } from '../../../src/features/notifications/email/services/email.service';
 import { SendPasswordResetEmailDto } from '../../../src/features/notifications/email/dto/SendPasswordResetEmailDto';
+import { SendConfirmationRegisterDto } from '../../../src/features/notifications/email/dto/SendConfirmationRegisterDto';
 import { transporter } from '../../../src/config/email.config';
 import * as templateUtil from '../../../src/utils/passwordResetTemplate';
+import { confirmationRegisterTemplate } from '../../../src/utils/confirmationRegisterTemplate';
 
 jest.mock('../../../src/config/email.config', () => ({
   transporter: {
@@ -11,6 +13,10 @@ jest.mock('../../../src/config/email.config', () => ({
 
 jest.mock('../../../src/utils/passwordResetTemplate', () => ({
   passwordResetTemplate: jest.fn().mockReturnValue('<html>Mock HTML</html>'),
+}));
+
+jest.mock('../../../src/utils/confirmationRegisterTemplate', () => ({
+  confirmationRegisterTemplate: jest.fn().mockReturnValue('<html>Mock Registration HTML</html>'),
 }));
 
 describe('sendPasswordResetEmail', () => {
@@ -39,5 +45,49 @@ describe('sendPasswordResetEmail', () => {
     (transporter.sendMail as jest.Mock).mockRejectedValueOnce(new Error('SMTP Error'));
 
     await expect(sendPasswordResetEmail(dto)).rejects.toThrow('SMTP Error');
+  });
+});
+
+describe('sendConfirmationRegister', () => {
+  const mockDto: SendConfirmationRegisterDto = {
+    email: 'test@example.com',
+    full_name: 'Test User',
+    userType: 'mobile'
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should send registration confirmation email for mobile users', async () => {
+    await sendConfirmationRegister(mockDto);
+
+    expect(confirmationRegisterTemplate).toHaveBeenCalledWith('mobile', 'Test User');
+    expect(transporter.sendMail).toHaveBeenCalledWith({
+      from: `"MS Notification" <${process.env.EMAIL_USER}>`,
+      to: mockDto.email,
+      subject: 'Registration Confirmation',
+      html: '<html>Mock Registration HTML</html>',
+    });
+  });
+
+  it('should send registration confirmation email for web users', async () => {
+    const webDto = { ...mockDto, userType: 'web' as const };
+    
+    await sendConfirmationRegister(webDto);
+
+    expect(confirmationRegisterTemplate).toHaveBeenCalledWith('web', 'Test User');
+    expect(transporter.sendMail).toHaveBeenCalledWith({
+      from: `"MS Notification" <${process.env.EMAIL_USER}>`,
+      to: webDto.email,
+      subject: 'Registration Confirmation',
+      html: '<html>Mock Registration HTML</html>',
+    });
+  });
+
+  it('should throw error if transporter.sendMail fails for registration', async () => {
+    (transporter.sendMail as jest.Mock).mockRejectedValueOnce(new Error('SMTP Error'));
+
+    await expect(sendConfirmationRegister(mockDto)).rejects.toThrow('SMTP Error');
   });
 });
