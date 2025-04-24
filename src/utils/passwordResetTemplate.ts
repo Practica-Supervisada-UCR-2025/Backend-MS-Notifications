@@ -12,11 +12,7 @@ export function passwordResetTemplate(recoveryLink: string): string {
         </div>
         <p style="font-size: 14px; color: #888;">
           If you didn’t request this, you can safely ignore this email.
-        </p>{
-  "email": "estrojas521@gmail.com",
-  "recoveryLink": "https://example.com/reset-password?token=123456"
-}
-
+        </p>
         <hr style="border: none; border-top: 1px solid #e0e0e0; margin: 30px 0;">
         <p style="font-size: 12px; color: #aaa;">
           — UCR Connect Team
