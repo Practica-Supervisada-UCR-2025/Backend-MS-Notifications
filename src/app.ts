@@ -1,12 +1,12 @@
 import express from 'express';
 import dotenv from 'dotenv';
-import { sendEmailController } from './features/notifications/email/controllers/email.controller';
+import emailRoutes from './features/notifications/email/routes/email.routes';
 
 dotenv.config();
-const app = express();
+export const app = express();
 app.use(express.json());
 
-app.post('/send-password-reset', sendEmailController);
+app.use('/api/email', emailRoutes);
 
 app.listen(3001, () => {
   console.log('MS-Notification running on http://localhost:3001');
