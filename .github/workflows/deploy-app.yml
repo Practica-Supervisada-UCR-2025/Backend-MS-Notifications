@@ -13,7 +13,7 @@ on:
 
 
 jobs:
-  deploy-web-app:
+  deploy-backend-notification-app:
     uses: Practica-Supervisada-UCR-2025/Repo-DevOps/.github/workflows/deploy-app-reusable-workflow.yml@main
     with:
       app_path: "."
@@ -21,6 +21,7 @@ jobs:
       container_name: "backend-notification-app"
       production_server_port: "3002"
       program_assigned_port: "3001"
+      env_directory: "backend-notification-app"
 
     secrets:
       DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
@@ -29,9 +30,4 @@ jobs:
       SERVER_USER: ${{ secrets.SERVER_USER }}
       SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
 
-      DB_HOST: ${{ secrets.DB_HOST }}
-      DB_NAME: ${{ secrets.DB_NAME }}
-      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      DB_PORT: ${{ secrets.DB_PORT }}
-      DB_USER: ${{ secrets.DB_USER }}
-      FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
+      ANY_ENV_FILE: ${{ secrets.ANY_ENV_FILE }}
