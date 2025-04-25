@@ -1,13 +1,16 @@
 import express from 'express';
-import dotenv from 'dotenv';
-import emailRoutes from './features/notifications/email/routes/email.routes';
 
-dotenv.config();
-export const app = express();
-app.use(express.json());
+const app = express();
+const PORT = 3000;
 
-app.use('/api/email', emailRoutes);
-
-app.listen(3001, () => {
-  console.log('MS-Notification running on http://localhost:3001');
+app.get('/', (req, res) => {
+    res.send('Server is running on port 3000');
 });
+
+export default app;
+
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+}
