@@ -1,19 +1,16 @@
+import axios from 'axios';
 import { sendPasswordResetEmail } from '../../../src/features/notifications/email/services/email.service';
 import { SendPasswordResetEmailDto } from '../../../src/features/notifications/email/dto/SendPasswordResetEmailDto';
-import { transporter } from '../../../src/config/email.config';
 import * as templateUtil from '../../../src/utils/passwordResetTemplate';
 
-jest.mock('../../../src/config/email.config', () => ({
-  transporter: {
-    sendMail: jest.fn(),
-  },
-}));
-
+jest.mock('axios');
 jest.mock('../../../src/utils/passwordResetTemplate', () => ({
   passwordResetTemplate: jest.fn().mockReturnValue('<html>Mock HTML</html>'),
 }));
 
-describe('sendPasswordResetEmail', () => {
+const mockedAxiosPost = axios.post as jest.Mock;
+
+describe('sendPasswordResetEmail (SMTP2GO Web API)', () => {
   const dto: SendPasswordResetEmailDto = {
     email: 'test@example.com',
     recoveryLink: 'https://example.com/reset',
@@ -23,21 +20,27 @@ describe('sendPasswordResetEmail', () => {
     jest.clearAllMocks();
   });
 
-  it('should send an email using the transporter', async () => {
+  it('should send an email using the SMTP2GO API', async () => {
+    mockedAxiosPost.mockResolvedValueOnce({ status: 200 });
+
     await sendPasswordResetEmail(dto);
 
     expect(templateUtil.passwordResetTemplate).toHaveBeenCalledWith(dto.recoveryLink);
-    expect(transporter.sendMail).toHaveBeenCalledWith({
-      from: `"MS Notification" <${process.env.EMAIL_USER}>`,
-      to: dto.email,
-      subject: 'Reset your password',
-      html: '<html>Mock HTML</html>',
-    });
+    expect(mockedAxiosPost).toHaveBeenCalledWith(
+      'https://api.smtp2go.com/v3/email/send',
+      {
+        api_key: process.env.SMTP2GO_API_KEY,
+        to: [dto.email],
+        sender: process.env.EMAIL_USER,
+        subject: 'Reset your password',
+        html_body: '<html>Mock HTML</html>',
+      }
+    );
   });
 
-  it('should throw error if transporter.sendMail fails', async () => {
-    (transporter.sendMail as jest.Mock).mockRejectedValueOnce(new Error('SMTP Error'));
+  it('should throw an error if API call fails', async () => {
+    mockedAxiosPost.mockRejectedValueOnce(new Error('SMTP2GO Error'));
 
-    await expect(sendPasswordResetEmail(dto)).rejects.toThrow('SMTP Error');
+    await expect(sendPasswordResetEmail(dto)).rejects.toThrow('SMTP2GO Error');
   });
 });
