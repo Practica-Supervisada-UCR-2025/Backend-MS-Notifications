@@ -4,7 +4,9 @@ import { SendConfirmationRegisterDto } from '../../../src/features/notifications
 import { transporter } from '../../../src/config/email.config';
 import * as templateUtil from '../../../src/utils/passwordResetTemplate';
 import { confirmationRegisterTemplate } from '../../../src/utils/confirmationRegisterTemplate';
+import axios from 'axios';
 
+jest.mock('axios');
 jest.mock('../../../src/config/email.config', () => ({
   transporter: {
     sendMail: jest.fn(),
@@ -57,17 +59,19 @@ describe('sendConfirmationRegister', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (axios.post as jest.Mock).mockResolvedValue({ data: { success: true } });
   });
 
   it('should send registration confirmation email for mobile users', async () => {
     await sendConfirmationRegister(mockDto);
 
     expect(confirmationRegisterTemplate).toHaveBeenCalledWith('mobile', 'Test User');
-    expect(transporter.sendMail).toHaveBeenCalledWith({
-      from: `"MS Notification" <${process.env.EMAIL_USER}>`,
-      to: mockDto.email,
+    expect(axios.post).toHaveBeenCalledWith('https://api.smtp2go.com/v3/email/send', {
+      api_key: process.env.SMTP2GO_API_KEY,
+      to: [mockDto.email],
+      sender: process.env.EMAIL_USER,
       subject: 'Registration Confirmation',
-      html: '<html>Mock Registration HTML</html>',
+      html_body: '<html>Mock Registration HTML</html>',
     });
   });
 
@@ -77,16 +81,17 @@ describe('sendConfirmationRegister', () => {
     await sendConfirmationRegister(webDto);
 
     expect(confirmationRegisterTemplate).toHaveBeenCalledWith('web', 'Test User');
-    expect(transporter.sendMail).toHaveBeenCalledWith({
-      from: `"MS Notification" <${process.env.EMAIL_USER}>`,
-      to: webDto.email,
+    expect(axios.post).toHaveBeenCalledWith('https://api.smtp2go.com/v3/email/send', {
+      api_key: process.env.SMTP2GO_API_KEY,
+      to: [webDto.email],
+      sender: process.env.EMAIL_USER,
       subject: 'Registration Confirmation',
-      html: '<html>Mock Registration HTML</html>',
+      html_body: '<html>Mock Registration HTML</html>',
     });
   });
 
-  it('should throw error if transporter.sendMail fails for registration', async () => {
-    (transporter.sendMail as jest.Mock).mockRejectedValueOnce(new Error('SMTP Error'));
+  it('should throw error if smtp2go request fails', async () => {
+    (axios.post as jest.Mock).mockRejectedValueOnce(new Error('SMTP Error'));
 
     await expect(sendConfirmationRegister(mockDto)).rejects.toThrow('SMTP Error');
   });
