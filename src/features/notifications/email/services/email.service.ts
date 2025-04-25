@@ -4,6 +4,7 @@ import { SendPasswordResetEmailDto } from '../dto/SendPasswordResetEmailDto';
 import { SendConfirmationRegisterDto, UserType } from '../dto/SendConfirmationRegisterDto';
 import { passwordResetTemplate } from '../../../../utils/passwordResetTemplate';
 import { confirmationRegisterTemplate } from '../../../../utils/confirmationRegisterTemplate';
+import axios from 'axios';
 
 export async function sendPasswordResetEmail({ email, recoveryLink }: SendPasswordResetEmailDto): Promise<void> {
   const html = passwordResetTemplate(recoveryLink);
@@ -17,10 +18,12 @@ export async function sendPasswordResetEmail({ email, recoveryLink }: SendPasswo
 
 export async function sendConfirmationRegister({ email, full_name, userType }: SendConfirmationRegisterDto): Promise<void> {
   const html = confirmationRegisterTemplate(userType, full_name);
-  await transporter.sendMail({
-    from: `"MS Notification" <${process.env.EMAIL_USER}>`,
-    to: email,
+  const payload = {
+    api_key: process.env.SMTP2GO_API_KEY,
+    to: [email],
+    sender: process.env.EMAIL_USER,
     subject: 'Registration Confirmation',
-    html,
-  });
+    html_body: html,
+  };
+  await axios.post('https://api.smtp2go.com/v3/email/send', payload);
 }
