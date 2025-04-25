@@ -18,7 +18,7 @@ export function confirmationRegisterTemplate(
 function userConfirmationTemplate(userName: string): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 30px; background-color: #f9f9f9;">
-      <h2 style="color: #333;">Welcome to UCR Connect, ${userName || 'New User'}!</h2>
+      <h2 style="color: rgb(41, 67, 95);">Welcome to UCR Connect, ${userName || 'New User'}!</h2>
       <p style="font-size: 16px; color: #555;">
         Your registration has been completed successfully. Thank you for joining our community!
       </p>
@@ -34,7 +34,7 @@ function userConfirmationTemplate(userName: string): string {
 function adminConfirmationTemplate(userName: string): string {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e0e0e0; border-radius: 8px; padding: 30px; background-color: #f9f9f9;">
-      <h2 style="color: #333;">Welcome to UCR Connect Admin Dashboard, ${userName || 'Administrator'}!</h2>
+      <h2 style="color: rgb(41, 67, 95);">Welcome to UCR Connect Admin Dashboard, ${userName || 'Administrator'}!</h2>
       <p style="font-size: 16px; color: #555;">
         Your administrator account has been successfully activated.
       </p>
