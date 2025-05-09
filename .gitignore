@@ -53,3 +53,6 @@ pids/
 
 # parcel-bundler cache
 .cache
+
+# Secrets folder
+src/config/secrets/
