@@ -1,5 +1,6 @@
 import express from 'express';
-import { authenticateJWT } from '../../../../utils/auth.middleware';
+import { authenticateJWT, authorizeRoles } from '../../../../utils/auth.middleware';
+import { registerFmcToken } from '../controllers/pushNotification.controller';
 import {
     sendNotificationToUserController,
     sendNotificationToAllUsersController,
@@ -7,13 +8,16 @@ import {
 
 const router = express.Router();
 
-// Test route to verify authentication
-router.get('/test-auth', authenticateJWT, (req, res) => {
-    const user = (req as any).user; // Temporary workaround
-    res.status(200).json({ message: 'Authentication successful!', user });
-});
+// Route to register FCM token
+// This route is protected and requires authentication
+router.post(
+    '/register-fmc-token',
+    authenticateJWT,
+    authorizeRoles('admin'),
+    registerFmcToken
+);
 
-router.post('/send-to-user', authenticateJWT, sendNotificationToUserController);
-router.post('/send-to-all', authenticateJWT, sendNotificationToAllUsersController);
+router.post('/send-to-user', authenticateJWT, authorizeRoles('admin'), sendNotificationToUserController);
+router.post('/send-to-all', authenticateJWT, authorizeRoles('admin'), sendNotificationToAllUsersController);
 
 export default router;

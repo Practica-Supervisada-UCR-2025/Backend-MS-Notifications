@@ -1,39 +1,102 @@
 import { firebaseAuth } from '../../../../config/firebase';
 import admin from 'firebase-admin';
 import { SendNotificationDto } from '../dto/pushNotificationDto';
+import { FmcTokenDTO } from '../dto/fmcToken.dto';
+import fs from 'fs';
+import { Client } from 'pg';
+import client from "../../../../config/database";
+
+const conn = client as Client;
 
 export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<void> => {
-    const { userId, title, body } = dto;
+    const { userId, title, body, } = dto;
 
-    // Retrieve the user's FCM token from Firebase Authentication or your database
-    const userRecord = await firebaseAuth.getUser(userId!);
-    const fcmToken = userRecord.customClaims?.fcmToken; // Assuming FCM token is stored in custom claims
+    // Retrieve all FCM tokens for the user from the database
+    const query = `
+        SELECT fmc_token, device_type
+        FROM fmc_tokens
+        WHERE user_id = $1
+    `;
+    const { rows } = await conn.query(query, [userId]);
 
-    if (!fcmToken) {
-        throw new Error('User does not have a valid FCM token');
+    if (!rows || rows.length === 0) {
+        throw new Error('User does not have any valid FCM tokens');
     }
 
-    const message = {
-        token: fcmToken,
-        notification: {
-            title,
-            body,
-        },
-    };
+    for (const row of rows) {
+        const fcmToken = row.fmc_token;
+        if (!fcmToken) {
+            continue;
+        }
 
-    await admin.messaging().send(message);
+        const message = {
+            token: fcmToken,
+            notification: {
+                title,
+                body,
+            },
+            data: {
+                name: dto.name,
+            }
+        };
+
+        try {
+            await admin.messaging().send(message);
+        } catch (err) {
+            console.error(`Failed to send notification to token: ${fcmToken}`, err);
+        }
+    }
 };
 
 export const sendNotificationToAllUsers = async (dto: Omit<SendNotificationDto, 'userId'>): Promise<void> => {
     const { title, body } = dto;
 
-    const message = {
-        topic: 'all', // Assuming all users are subscribed to the 'all' topic
-        notification: {
-            title,
-            body,
-        },
-    };
+    // Retrieve all FCM tokens from the database
+    const query = `
+        SELECT fmc_token, device_type
+        FROM fmc_tokens
+    `;
+    const { rows } = await conn.query(query);
 
-    await admin.messaging().send(message);
+    if (!rows || rows.length === 0) {
+        throw new Error('No FCM tokens found in the database');
+    }
+
+    for (const row of rows) {
+        const fcmToken = row.fmc_token;
+        if (!fcmToken) {
+            continue;
+        }
+
+        const message = {
+            token: fcmToken,
+            notification: {
+                title,
+                body,
+            },
+            data: {
+                name: dto.name,
+            }
+        };
+
+        try {
+            await admin.messaging().send(message);
+        } catch (err) {
+            console.error(`Failed to send notification to token: ${fcmToken}`, err);
+        }
+    }
 };
+
+export async function saveFmcToken({ fmcToken, deviceType, userId }: FmcTokenDTO) {
+
+    try {
+        const { rows } = await conn.query(
+            `INSERT INTO fmc_tokens (fmc_token, device_type, user_id) VALUES ($1, $2, $3) RETURNING *;`,
+            [fmcToken, deviceType, userId]
+        );
+        return rows[0];
+    } catch (error) {
+        throw error;
+    }
+}
+
