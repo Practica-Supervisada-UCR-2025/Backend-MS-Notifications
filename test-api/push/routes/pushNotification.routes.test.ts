@@ -99,11 +99,11 @@ describe('POST /api/push-notifications/send-to-user', () => {
         const response = await request(app)
             .post('/api/push-notifications/send-to-user')
             .set('Authorization', adminToken)
-            .send({ userId: 'user1', title: 't', body: 'b', name: 'n' });
+            .send({ userId: 'user1', title: 't', body: 'b', name: 'n', publicationId: '12345' });
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual({ message: 'Notification sent to user successfully!' });
-        expect(mockSend).toHaveBeenCalledWith({ userId: 'user1', title: 't', body: 'b', name: 'n' });
+        expect(mockSend).toHaveBeenCalledWith({ userId: 'user1', title: 't', body: 'b', name: 'n', publicationId: '12345' });
     });
 
     it('should return 400 if required fields are missing', async () => {
@@ -124,7 +124,7 @@ describe('POST /api/push-notifications/send-to-user', () => {
         const response = await request(app)
             .post('/api/push-notifications/send-to-user')
             .set('Authorization', adminToken)
-            .send({ userId: 'user1', title: 't', body: 'b', name: 'n' });
+            .send({ userId: 'user1', title: 't', body: 'b', name: 'n', publicationId: '12345' });
 
         expect(response.status).toBe(500);
         expect(response.body).toEqual({ message: 'Failed to send notification to user' });

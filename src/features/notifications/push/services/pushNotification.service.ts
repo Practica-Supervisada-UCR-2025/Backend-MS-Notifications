@@ -29,16 +29,23 @@ export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<
             continue;
         }
 
+        // Create data object first
+        let messageData: { [key: string]: string } = {
+            name: dto.name
+        };
+
+        // Add publicationId only if it exists
+        if (dto.publicationId) {
+            messageData.publicationId = dto.publicationId;
+        }
+
         const message = {
             token: fcmToken,
             notification: {
                 title,
                 body,
             },
-            data: {
-                name: dto.name,
-                publicationId: dto.publicationId
-            }
+            data: messageData
         };
 
         try {
@@ -49,7 +56,7 @@ export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<
     }
 };
 
-export const sendNotificationToAllUsers = async (dto: Omit<SendNotificationDto, 'userId'>): Promise<void> => {
+export const sendNotificationToAllUsers = async (dto: Omit<SendNotificationDto, 'userId' | 'publicationId'>): Promise<void> => {
     const { title, body } = dto;
 
     // Retrieve all FCM tokens from the database

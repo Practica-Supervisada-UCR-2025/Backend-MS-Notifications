@@ -10,6 +10,7 @@ describe('SendNotificationDto', () => {
             title: 'Test Title',
             body: 'Test Body',
             name: 'Test Name',
+            publicationId: '12345',
         };
         // If using class-validator decorators, instantiate as class and validate
         // Otherwise, just check required fields
@@ -23,6 +24,7 @@ describe('SendNotificationDto', () => {
             title: 'Test Title',
             body: 'Test Body',
             name: 'Test Name',
+            publicationId: '12345',
         };
         expect(dto.userId).toBeUndefined();
         expect(dto.title).toBeDefined();
