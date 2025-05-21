@@ -24,7 +24,7 @@ export async function registerFmcToken(req: Request, res: Response): Promise<voi
 export const sendNotificationToUserController = async (req: Request, res: Response): Promise<void> => {
     const dto = req.body as SendNotificationDto;
 
-    if (!dto.userId || !dto.title || !dto.body || !dto.name) {
+    if (!dto.userId || !dto.title || !dto.body || !dto.name || !dto.publicationId) {
         res.status(400).json({ message: 'Missing required fields' });
         return;
     }

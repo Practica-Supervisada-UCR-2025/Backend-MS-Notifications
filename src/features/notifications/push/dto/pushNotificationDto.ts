@@ -3,4 +3,5 @@ export interface SendNotificationDto {
     title: string;
     body: string;
     name: string;
+    publicationId: string;
 }

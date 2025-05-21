@@ -9,7 +9,7 @@ import client from "../../../../config/database";
 const conn = client as Client;
 
 export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<void> => {
-    const { userId, title, body, } = dto;
+    const { userId, title, body, name, publicationId } = dto;
 
     // Retrieve all FCM tokens for the user from the database
     const query = `
@@ -37,6 +37,7 @@ export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<
             },
             data: {
                 name: dto.name,
+                publicationId: dto.publicationId
             }
         };
 
