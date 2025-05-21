@@ -5,15 +5,15 @@ import * as pushService from '../services/pushNotification.service';
 
 
 export async function registerFmcToken(req: Request, res: Response): Promise<void> {
-    const { fmcToken, deviceType, userId } = req.body;
+    const { fcmToken, deviceType, userId } = req.body;
 
-    if (!fmcToken || !deviceType || !userId) {
+    if (!fcmToken || !deviceType || !userId) {
         res.status(400).json({ message: 'All fields are required' });
         return;
     }
 
     try {
-        const result = await pushService.saveFmcToken({ fmcToken, deviceType, userId });
+        const result = await pushService.saveFmcToken({ fcmToken, deviceType, userId });
         res.status(201).json(result);
     } catch (error: any) {
         res.status(500).json({ message: 'Error saving FMC token', error: error.message });

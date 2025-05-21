@@ -13,8 +13,8 @@ export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<
 
     // Retrieve all FCM tokens for the user from the database
     const query = `
-        SELECT fmc_token, device_type
-        FROM fmc_tokens
+        SELECT fcm_token, device_type
+        FROM fcm_tokens
         WHERE user_id = $1
     `;
     const { rows } = await conn.query(query, [userId]);
@@ -24,7 +24,7 @@ export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<
     }
 
     for (const row of rows) {
-        const fcmToken = row.fmc_token;
+        const fcmToken = row.fcm_token;
         if (!fcmToken) {
             continue;
         }
@@ -53,8 +53,8 @@ export const sendNotificationToAllUsers = async (dto: Omit<SendNotificationDto, 
 
     // Retrieve all FCM tokens from the database
     const query = `
-        SELECT fmc_token, device_type
-        FROM fmc_tokens
+        SELECT fcm_token, device_type
+        FROM fcm_tokens
     `;
     const { rows } = await conn.query(query);
 
@@ -63,7 +63,7 @@ export const sendNotificationToAllUsers = async (dto: Omit<SendNotificationDto, 
     }
 
     for (const row of rows) {
-        const fcmToken = row.fmc_token;
+        const fcmToken = row.fcm_token;
         if (!fcmToken) {
             continue;
         }
@@ -87,12 +87,12 @@ export const sendNotificationToAllUsers = async (dto: Omit<SendNotificationDto, 
     }
 };
 
-export async function saveFmcToken({ fmcToken, deviceType, userId }: FmcTokenDTO) {
+export async function saveFmcToken({ fcmToken, deviceType, userId }: FmcTokenDTO) {
 
     try {
         const { rows } = await conn.query(
-            `INSERT INTO fmc_tokens (fmc_token, device_type, user_id) VALUES ($1, $2, $3) RETURNING *;`,
-            [fmcToken, deviceType, userId]
+            `INSERT INTO fcm_tokens (fcm_token, device_type, user_id) VALUES ($1, $2, $3) RETURNING *;`,
+            [fcmToken, deviceType, userId]
         );
         return rows[0];
     } catch (error) {

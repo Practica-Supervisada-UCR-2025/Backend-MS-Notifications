@@ -3,7 +3,7 @@ import jwt, { Secret, SignOptions } from 'jsonwebtoken';
 export function generateTestToken({
     role = 'admin',
     id = '123',
-    secret = 'default_secret',
+    secret = process.env.JWT_SECRET || 'default_secret',
     expiresIn = '1h'
 }: {
     role?: string;

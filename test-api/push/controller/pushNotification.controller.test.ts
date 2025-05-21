@@ -15,7 +15,7 @@ describe('registerFmcToken', () => {
     };
 
     it('should return 400 if required fields are missing', async () => {
-        const req = mockRequest({ fmcToken: 'token', deviceType: 'android' }); // missing userId
+        const req = mockRequest({ fcmToken: 'token', deviceType: 'android' }); // missing userId
         const res = mockResponse();
 
         await registerFmcToken(req, res);
@@ -25,7 +25,7 @@ describe('registerFmcToken', () => {
     });
 
     it('should save token and return 201 on success', async () => {
-        const reqBody = { fmcToken: 'token', deviceType: 'android', userId: 'user1' };
+        const reqBody = { fcmToken: 'token', deviceType: 'android', userId: 'user1' };
         const req = mockRequest(reqBody);
         const res = mockResponse();
 
@@ -39,7 +39,7 @@ describe('registerFmcToken', () => {
     });
 
     it('should return 500 if service throws', async () => {
-        const reqBody = { fmcToken: 'token', deviceType: 'android', userId: 'user1' };
+        const reqBody = { fcmToken: 'token', deviceType: 'android', userId: 'user1' };
         const req = mockRequest(reqBody);
         const res = mockResponse();
 

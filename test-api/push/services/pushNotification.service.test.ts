@@ -37,8 +37,8 @@ describe('sendNotificationToUser', () => {
     it('should send notifications to all user tokens', async () => {
         (client.query as jest.Mock).mockResolvedValueOnce({
             rows: [
-                { fmc_token: 'token1', device_type: 'android' },
-                { fmc_token: 'token2', device_type: 'ios' },
+                { fcm_token: 'token1', device_type: 'android' },
+                { fcm_token: 'token2', device_type: 'ios' },
             ],
         });
         const sendMock = (admin.messaging() as any).send as jest.Mock;
@@ -63,8 +63,8 @@ describe('sendNotificationToAllUsers', () => {
     it('should send notifications to all tokens', async () => {
         (client.query as jest.Mock).mockResolvedValueOnce({
             rows: [
-                { fmc_token: 'token1', device_type: 'android' },
-                { fmc_token: 'token2', device_type: 'ios' },
+                { fcm_token: 'token1', device_type: 'android' },
+                { fcm_token: 'token2', device_type: 'ios' },
             ],
         });
         const sendMock = (admin.messaging() as any).send as jest.Mock;
@@ -81,14 +81,14 @@ describe('sendNotificationToAllUsers', () => {
 
 describe('saveFmcToken', () => {
     it('should insert and return the saved token', async () => {
-        const mockRow = { fmc_token: 'token', device_type: 'android', user_id: 'user1' };
+        const mockRow = { fcm_token: 'token', device_type: 'android', user_id: 'user1' };
         (client.query as jest.Mock).mockResolvedValueOnce({ rows: [mockRow] });
 
-        const dto: FmcTokenDTO = { fmcToken: 'token', deviceType: 'android', userId: 'user1' as any };
+        const dto: FmcTokenDTO = { fcmToken: 'token', deviceType: 'android', userId: 'user1' as any };
         const result = await pushService.saveFmcToken(dto);
 
         expect(client.query).toHaveBeenCalledWith(
-            expect.stringContaining('INSERT INTO fmc_tokens'),
+            expect.stringContaining('INSERT INTO fcm_tokens'),
             ['token', 'android', 'user1']
         );
         expect(result).toEqual(mockRow);
@@ -96,7 +96,7 @@ describe('saveFmcToken', () => {
 
     it('should throw error if query fails', async () => {
         (client.query as jest.Mock).mockRejectedValueOnce(new Error('fail'));
-        const dto: FmcTokenDTO = { fmcToken: 'token', deviceType: 'android', userId: 'user1' as any };
+        const dto: FmcTokenDTO = { fcmToken: 'token', deviceType: 'android', userId: 'user1' as any };
         await expect(pushService.saveFmcToken(dto)).rejects.toThrow('fail');
     });
 });

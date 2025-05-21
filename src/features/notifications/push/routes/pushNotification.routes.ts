@@ -13,11 +13,11 @@ const router = express.Router();
 router.post(
     '/register-fmc-token',
     authenticateJWT,
-    authorizeRoles('admin'),
+    authorizeRoles('admin', 'moderator'),
     registerFmcToken
 );
 
-router.post('/send-to-user', authenticateJWT, authorizeRoles('admin'), sendNotificationToUserController);
-router.post('/send-to-all', authenticateJWT, authorizeRoles('admin'), sendNotificationToAllUsersController);
+router.post('/send-to-user', authenticateJWT, authorizeRoles('admin', 'moderator'), sendNotificationToUserController);
+router.post('/send-to-all', authenticateJWT, authorizeRoles('admin', 'moderator'), sendNotificationToAllUsersController);
 
 export default router;

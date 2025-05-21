@@ -5,8 +5,12 @@ export class JwtService {
 
     verifyToken(token: string): any {
         try {
-            return jwt.verify(token, this.secret);
+            const decoded = jwt.verify(token, this.secret);
+            return decoded;
         } catch (error) {
+            if (error instanceof Error) {
+            } else {
+            }
             throw new Error('Invalid token');
         }
     }

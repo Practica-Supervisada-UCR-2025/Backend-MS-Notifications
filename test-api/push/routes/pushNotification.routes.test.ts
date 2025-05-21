@@ -12,7 +12,6 @@ import { app } from '../../../src/app';
 import * as pushService from '../../../src/features/notifications/push/services/pushNotification.service';
 import { generateTestToken } from '../../../test-api/utils/generateTestToken.test';
 
-
 jest.mock('../../../src/features/notifications/push/services/pushNotification.service');
 
 const adminToken = 'Bearer ' + generateTestToken({ role: 'admin', id: '123' });
@@ -33,10 +32,10 @@ describe('POST /api/push-notifications/register-fmc-token', () => {
 
     it('should return 201 and saved token on success', async () => {
         // Simulate a dynamic token
-        const body = { fmcToken: 'dynamic-token-value', deviceType: 'android', userId: 'user1' };
+        const body = { fcmToken: 'dynamic-token-value', deviceType: 'android', userId: 'user1' };
         // The controller may generate a new token, so match any string
         mockSave.mockResolvedValueOnce({
-            fmcToken: 'some-generated-token',
+            fcmToken: 'some-generated-token',
             deviceType: 'android',
             userId: 'user1'
         });
@@ -47,16 +46,16 @@ describe('POST /api/push-notifications/register-fmc-token', () => {
             .send(body);
 
         // Debug: Uncomment to see the error returned by the controller
-        console.log(response.body);
+        // console.log(response.body);
 
         expect(response.status).toBe(201);
         expect(response.body).toEqual(expect.objectContaining({
-            fmcToken: expect.any(String),
+            fcmToken: expect.any(String),
             deviceType: 'android',
             userId: 'user1'
         }));
         expect(mockSave).toHaveBeenCalledWith(expect.objectContaining({
-            fmcToken: expect.any(String),
+            fcmToken: expect.any(String),
             deviceType: 'android',
             userId: 'user1'
         }));
@@ -67,7 +66,7 @@ describe('POST /api/push-notifications/register-fmc-token', () => {
         const response = await request(app)
             .post('/api/push-notifications/register-fmc-token')
             .set('Authorization', adminToken)
-            .send({ fmcToken: 'token', deviceType: 'android' }); // missing userId
+            .send({ fcmToken: 'token', deviceType: 'android' }); // missing userId
 
         expect(response.status).toBe(400);
         expect(response.body).toEqual({ message: 'All fields are required' });
@@ -80,7 +79,7 @@ describe('POST /api/push-notifications/register-fmc-token', () => {
         const response = await request(app)
             .post('/api/push-notifications/register-fmc-token')
             .set('Authorization', adminToken)
-            .send({ fmcToken: 'token', deviceType: 'android', userId: 'user1' });
+            .send({ fcmToken: 'token', deviceType: 'android', userId: 'user1' });
 
         expect(response.status).toBe(500);
         expect(response.body).toHaveProperty('message', 'Error saving FMC token');
@@ -151,7 +150,6 @@ describe('POST /api/push-notifications/send-to-all', () => {
         expect(response.body).toEqual({ message: 'Notification sent to all users successfully!' });
         expect(mockSendAll).toHaveBeenCalledWith({ title: 't', body: 'b', name: 'n' });
     });
-
 
     it('should return 500 if service throws', async () => {
         mockSendAll.mockRejectedValueOnce(new Error('fail'));

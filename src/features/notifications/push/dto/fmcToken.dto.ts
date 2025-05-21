@@ -1,5 +1,5 @@
 export interface FmcTokenDTO {
-    fmcToken: string;
+    fcmToken: string;
     deviceType: string;
     userId: number;
 }
