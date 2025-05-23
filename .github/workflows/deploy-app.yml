@@ -31,3 +31,4 @@ jobs:
       SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
 
       ANY_ENV_FILE: ${{ secrets.ANY_ENV_FILE }}
+      FIREBASE_CREDENTIALS: ${{ secrets.FIREBASE_CREDENTIALS }}
