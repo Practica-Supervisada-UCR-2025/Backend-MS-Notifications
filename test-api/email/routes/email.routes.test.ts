@@ -132,3 +132,5 @@ describe('POST /api/email/send-register-confirmation', () => {
     expect(response.body).toEqual({ message: 'Failed to send email' });
   });
 });
+
+
