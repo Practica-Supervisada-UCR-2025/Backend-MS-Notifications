@@ -24,7 +24,6 @@ WORKDIR /app
 # Copy only the necessary files from the builder stage
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
-
-EXPOSE 3002
+COPY --from=builder /app/src/firebase-service-account.json ./dist/src/firebase-service-account.json
 
 CMD ["node", "dist/app.js"]
