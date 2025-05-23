@@ -25,5 +25,7 @@ WORKDIR /app
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/src/firebase-service-account.json ./src/firebase-service-account.json
+COPY --from=builder /app/certs ./dist/certs
+COPY --from=builder /app/certs ./src/certs
 
 CMD ["node", "dist/app.js"]
