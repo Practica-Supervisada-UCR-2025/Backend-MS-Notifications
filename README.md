@@ -30,6 +30,8 @@ npm install -g typescript ts-node nodemon
 npm install express body-parser cookie-parser compression cors
 npm install -g @types/express @types/body-parser @types/cookie-parser @types/compression @types/cors
 npm install --save-dev @types/supertest jest ts-jest @types/jest
+npm install firebase-admin express body-parser
+npm install firebase
 ```
 
 ### Install PostgreSQL
