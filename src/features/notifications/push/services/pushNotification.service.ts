@@ -9,7 +9,7 @@ import client from "../../../../config/database";
 const conn = client as Client;
 
 export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<void> => {
-    const { userId, title, body, } = dto;
+    const { userId, title, body, name, publicationId } = dto;
 
     // Retrieve all FCM tokens for the user from the database
     const query = `
@@ -29,15 +29,23 @@ export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<
             continue;
         }
 
+        // Create data object first
+        let messageData: { [key: string]: string } = {
+            name: dto.name
+        };
+
+        // Add publicationId only if it exists
+        if (dto.publicationId) {
+            messageData.publicationId = dto.publicationId;
+        }
+
         const message = {
             token: fcmToken,
             notification: {
                 title,
                 body,
             },
-            data: {
-                name: dto.name,
-            }
+            data: messageData
         };
 
         try {
@@ -48,7 +56,7 @@ export const sendNotificationToUser = async (dto: SendNotificationDto): Promise<
     }
 };
 
-export const sendNotificationToAllUsers = async (dto: Omit<SendNotificationDto, 'userId'>): Promise<void> => {
+export const sendNotificationToAllUsers = async (dto: Omit<SendNotificationDto, 'userId' | 'publicationId'>): Promise<void> => {
     const { title, body } = dto;
 
     // Retrieve all FCM tokens from the database

@@ -44,7 +44,13 @@ describe('sendNotificationToUser', () => {
         const sendMock = (admin.messaging() as any).send as jest.Mock;
         sendMock.mockResolvedValue(undefined);
 
-        const dto = { userId: 'user1', title: 't', body: 'b', name: 'n' };
+        const dto: SendNotificationDto = { 
+            userId: 'user1', 
+            title: 't', 
+            body: 'b', 
+            name: 'n', 
+            publicationId: '12345' 
+        };
         await pushService.sendNotificationToUser(dto);
 
         expect(sendMock).toHaveBeenCalledTimes(2);
@@ -56,7 +62,11 @@ describe('sendNotificationToUser', () => {
 describe('sendNotificationToAllUsers', () => {
     it('should throw error if no tokens found', async () => {
         (client.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
-        const dto = { title: 't', body: 'b', name: 'n' };
+        const dto: Omit<SendNotificationDto, 'userId' | 'publicationId'> = { 
+            title: 't', 
+            body: 'b', 
+            name: 'n' 
+        };
         await expect(pushService.sendNotificationToAllUsers(dto)).rejects.toThrow('No FCM tokens found in the database');
     });
 
@@ -70,7 +80,11 @@ describe('sendNotificationToAllUsers', () => {
         const sendMock = (admin.messaging() as any).send as jest.Mock;
         sendMock.mockResolvedValue(undefined);
 
-        const dto = { title: 't', body: 'b', name: 'n' };
+        const dto: Omit<SendNotificationDto, 'userId' | 'publicationId'> = { 
+            title: 't', 
+            body: 'b', 
+            name: 'n' 
+        };
         await pushService.sendNotificationToAllUsers(dto);
 
         expect(sendMock).toHaveBeenCalledTimes(2);

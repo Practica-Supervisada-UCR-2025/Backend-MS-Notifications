@@ -1,14 +1,14 @@
 name: Run tests and upload coverage
 
-# Allow runners to get read only access to this repository files(set explicitly now because github requires it)
 permissions:
   contents: read
 
 on:
+  push:
   pull_request:
-      branches:
-        - main
-        - develop
+    branches:
+      - main
+      - develop
   workflow_dispatch:
     inputs:
       test-app:
@@ -26,12 +26,27 @@ jobs:
         with:
           fetch-depth: 2
 
+      - name: Create src directory if it doesn't exist
+        run: mkdir -p src
+
+      - name: Create firebase credentials.json
+        uses: jsdaniell/create-json@v1.2.3
+        with:
+          name: "firebase-service-account.json"
+          json: ${{ secrets.FIREBASE_CREDENTIALS }}
+          dir: "src/"
+
+      - name: Set FIREBASE_SERVICE_ACCOUNT_PATH env variable
+        run: echo "FIREBASE_SERVICE_ACCOUNT_PATH=src/firebase-service-account.json" >> $GITHUB_ENV
+
       - name: Set up Node
         uses: actions/setup-node@v4
+        with:
+          node-version: "18"
 
       - name: Install dependencies
         run: npm install
-        
+
       - name: Debug environment
         run: |
           echo "Node version: $(node -v)"
@@ -39,9 +54,10 @@ jobs:
           echo "Installed dependencies:"
           npm list --depth=0
 
-      - name: Run tests
+      - name: Run tests with coverage
         run: npx cross-env NODE_ENV=test jest --coverage
-      - name: Upload results to Codecov
+
+      - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

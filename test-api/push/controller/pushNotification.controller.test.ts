@@ -72,7 +72,7 @@ describe('sendNotificationToUserController', () => {
     });
 
     it('should send notification and return 200 on success', async () => {
-        const dto: SendNotificationDto = { userId: 'user1', title: 't', body: 'b', name: 'n' };
+        const dto: SendNotificationDto = { userId: 'user1', title: 't', body: 'b', name: 'n', publicationId: '12345' };
         const req = mockRequest(dto);
         const res = mockResponse();
 
@@ -86,7 +86,7 @@ describe('sendNotificationToUserController', () => {
     });
 
     it('should return 500 if service throws', async () => {
-        const dto: SendNotificationDto = { userId: 'user1', title: 't', body: 'b', name: 'n' };
+        const dto: SendNotificationDto = { userId: 'user1', title: 't', body: 'b', name: 'n', publicationId: '12345' };
         const req = mockRequest(dto);
         const res = mockResponse();
 
