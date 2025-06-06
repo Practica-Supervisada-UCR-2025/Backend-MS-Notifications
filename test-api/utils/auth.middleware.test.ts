@@ -99,9 +99,25 @@ describe('authorizeRoles', () => {
         json: jest.fn(),
     } as any;
 
-    it('should call next if user role is allowed', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
+    it('should call next if admin role is allowed', () => {
         const req = { user: { role: 'admin' } } as any;
         authorizeRoles('admin', 'moderator')(req, res, next);
+        expect(next).toHaveBeenCalled();
+    });
+
+    it('should call next if moderator role is allowed', () => {
+        const req = { user: { role: 'moderator' } } as any;
+        authorizeRoles('admin', 'moderator')(req, res, next);
+        expect(next).toHaveBeenCalled();
+    });
+
+    it('should call next if user role is explicitly allowed', () => {
+        const req = { user: { role: 'user' } } as any;
+        authorizeRoles('admin', 'moderator', 'user')(req, res, next);
         expect(next).toHaveBeenCalled();
     });
 
