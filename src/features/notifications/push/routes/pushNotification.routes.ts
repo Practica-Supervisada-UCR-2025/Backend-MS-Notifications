@@ -13,7 +13,7 @@ const router = express.Router();
 router.post(
     '/register-fmc-token',
     authenticateJWT,
-    authorizeRoles('admin', 'moderator'),
+    authorizeRoles('admin', 'moderator', 'user'),
     registerFmcToken
 );
 
