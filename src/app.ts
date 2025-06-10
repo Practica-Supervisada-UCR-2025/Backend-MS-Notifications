@@ -7,7 +7,7 @@ require("appdynamics").profile({
  accountName: process.env.APP_DYNAMICS_ACCOUNT_NAME,
  accountAccessKey: process.env.APP_DYNAMICS_KEY,
  applicationName: 'Backend-user-app',
- tierName: 'Backend-posts-tier',
+ tierName: 'Notification',
  nodeName: 'notification-node' // The controller will automatically append the node name with a unique number
 });
 import express from 'express';
