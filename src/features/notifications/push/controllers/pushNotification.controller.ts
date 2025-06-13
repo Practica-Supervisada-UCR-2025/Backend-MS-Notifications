@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { sendNotificationToUser, sendNotificationToAllUsers } from '../services/pushNotification.service';
+import { sendNotificationToUser, sendNotificationToAllUsers, sendNotificationToUserComment } from '../services/pushNotification.service';
 import { SendNotificationDto } from '../dto/pushNotificationDto';
 import * as pushService from '../services/pushNotification.service';
 
@@ -50,5 +50,21 @@ export const sendNotificationToAllUsersController = async (req: Request, res: Re
         res.status(200).json({ message: 'Notification sent to all users successfully!' });
     } catch (error) {
         res.status(500).json({ message: 'Failed to send notification to all users' });
+    }
+};
+
+export const sendNotificationToUserCommentController = async (req: Request, res: Response): Promise<void> => {
+    const dto = req.body as SendNotificationDto;
+
+    if (!dto.userId || !dto.publicationId || !dto.commentBody || !dto.commentUserId || !dto.title || !dto.body) {
+        res.status(400).json({ message: 'Missing required fields' });
+        return;
+    }
+
+    try {
+        await sendNotificationToUserComment(dto);
+        res.status(200).json({ message: 'Notification sent to user successfully!' });
+    } catch (error) {
+        res.status(500).json({ message: 'Failed to send notification to user' });
     }
 };

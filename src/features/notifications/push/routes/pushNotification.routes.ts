@@ -4,6 +4,7 @@ import { registerFmcToken } from '../controllers/pushNotification.controller';
 import {
     sendNotificationToUserController,
     sendNotificationToAllUsersController,
+    sendNotificationToUserCommentController
 } from '../controllers/pushNotification.controller';
 
 const router = express.Router();
@@ -19,5 +20,6 @@ router.post(
 
 router.post('/send-to-user', authenticateJWT, authorizeRoles('admin', 'moderator'), sendNotificationToUserController);
 router.post('/send-to-all', authenticateJWT, authorizeRoles('admin', 'moderator'), sendNotificationToAllUsersController);
+router.post('/send-to-user-comment', authenticateJWT, authorizeRoles('admin', 'moderator', 'user'), sendNotificationToUserCommentController);
 
 export default router;
