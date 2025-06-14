@@ -44,12 +44,12 @@ describe('sendNotificationToUser', () => {
         const sendMock = (admin.messaging() as any).send as jest.Mock;
         sendMock.mockResolvedValue(undefined);
 
-        const dto: SendNotificationDto = { 
-            userId: 'user1', 
-            title: 't', 
-            body: 'b', 
-            name: 'n', 
-            publicationId: '12345' 
+        const dto: SendNotificationDto = {
+            userId: 'user1',
+            title: 't',
+            body: 'b',
+            name: 'n',
+            publicationId: '12345'
         };
         await pushService.sendNotificationToUser(dto);
 
@@ -62,10 +62,10 @@ describe('sendNotificationToUser', () => {
 describe('sendNotificationToAllUsers', () => {
     it('should throw error if no tokens found', async () => {
         (client.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
-        const dto: Omit<SendNotificationDto, 'userId' | 'publicationId'> = { 
-            title: 't', 
-            body: 'b', 
-            name: 'n' 
+        const dto: Omit<SendNotificationDto, 'userId' | 'publicationId'> = {
+            title: 't',
+            body: 'b',
+            name: 'n'
         };
         await expect(pushService.sendNotificationToAllUsers(dto)).rejects.toThrow('No FCM tokens found in the database');
     });
@@ -80,10 +80,10 @@ describe('sendNotificationToAllUsers', () => {
         const sendMock = (admin.messaging() as any).send as jest.Mock;
         sendMock.mockResolvedValue(undefined);
 
-        const dto: Omit<SendNotificationDto, 'userId' | 'publicationId'> = { 
-            title: 't', 
-            body: 'b', 
-            name: 'n' 
+        const dto: Omit<SendNotificationDto, 'userId' | 'publicationId'> = {
+            title: 't',
+            body: 'b',
+            name: 'n'
         };
         await pushService.sendNotificationToAllUsers(dto);
 
@@ -114,6 +114,95 @@ describe('saveFmcToken', () => {
         await expect(pushService.saveFmcToken(dto)).rejects.toThrow('fail');
     });
 });
+
+describe('sendNotificationToUserComment', () => {
+    it('should send notifications to all user tokens with comment data', async () => {
+        (client.query as jest.Mock).mockResolvedValueOnce({
+            rows: [
+                { fcm_token: 'token1', device_type: 'android' },
+                { fcm_token: 'token2', device_type: 'ios' },
+            ],
+        });
+        const sendMock = (admin.messaging() as any).send as jest.Mock;
+        sendMock.mockResolvedValue(undefined);
+
+        const dto: SendNotificationDto = {
+            userId: 'user1',
+            title: 'Comment Title',
+            body: 'Comment Body',
+            name: 'User Name',
+            publicationId: 'pub123',
+            commentBody: 'Nice post!',
+            commentUserId: 'commenter1'
+        };
+        await pushService.sendNotificationToUserComment(dto);
+
+        expect(sendMock).toHaveBeenCalledTimes(2);
+        expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({
+            token: 'token1',
+            notification: expect.objectContaining({
+                title: 'Comment Title',
+                body: 'Comment Body'
+            }),
+            data: expect.objectContaining({
+                userId: 'user1',
+                title: 'Comment Title',
+                body: 'Comment Body',
+                publicationId: 'pub123',
+                commentBody: 'Nice post!',
+                commentUserId: 'commenter1'
+            })
+        }));
+        expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({
+            token: 'token2'
+        }));
+    });
+
+    it('should handle undefined optional fields safely', async () => {
+        (client.query as jest.Mock).mockResolvedValueOnce({
+            rows: [
+                { fcm_token: 'token1', device_type: 'android' }
+            ],
+        });
+        const sendMock = (admin.messaging() as any).send as jest.Mock;
+        sendMock.mockResolvedValue(undefined);
+
+        const dto: SendNotificationDto = {
+            userId: undefined as any,
+            title: 'T',
+            body: 'B',
+            name: 'N',
+            publicationId: undefined as any,
+            commentBody: undefined as any,
+            commentUserId: undefined as any
+        };
+        await pushService.sendNotificationToUserComment(dto);
+
+        expect(sendMock).toHaveBeenCalledWith(expect.objectContaining({
+            data: expect.objectContaining({
+                userId: '',
+                publicationId: '',
+                commentBody: '',
+                commentUserId: ''
+            })
+        }));
+    });
+
+    it('should throw error if user has no tokens', async () => {
+        (client.query as jest.Mock).mockResolvedValueOnce({ rows: [] });
+        const dto: SendNotificationDto = {
+            userId: 'user1',
+            title: 'T',
+            body: 'B',
+            name: 'N',
+            publicationId: 'pub',
+            commentBody: 'CB',
+            commentUserId: 'cuid'
+        };
+        await expect(pushService.sendNotificationToUserComment(dto)).rejects.toThrow('User does not have any valid FCM tokens');
+    });
+});
+
 
 afterAll(async () => {
     await client.end();

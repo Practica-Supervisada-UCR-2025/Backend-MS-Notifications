@@ -4,4 +4,11 @@ export interface SendNotificationDto {
     body: string;
     name: string;
     publicationId?: string;
+    commentBody?: string; // Optional for comment notifications
+    commentUserId?: string; // Optional for comment notifications
 }
+
+
+
+
+
