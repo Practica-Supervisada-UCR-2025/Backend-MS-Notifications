@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import { sendNotificationToUserController, sendNotificationToAllUsersController, registerFmcToken } from '../../../src/features/notifications/push/controllers/pushNotification.controller';
+import { sendNotificationToUserController, sendNotificationToAllUsersController, registerFmcToken, sendNotificationToUserCommentController } from '../../../src/features/notifications/push/controllers/pushNotification.controller';
 import * as pushService from '../../../src/features/notifications/push/services/pushNotification.service';
 import { SendNotificationDto } from '../../../src/features/notifications/push/dto/pushNotificationDto';
+
 
 jest.mock('../../../src/features/notifications/push/services/pushNotification.service');
 
@@ -143,5 +144,75 @@ describe('sendNotificationToAllUsersController', () => {
 
         expect(res.status).toHaveBeenCalledWith(500);
         expect(res.json).toHaveBeenCalledWith({ message: 'Failed to send notification to all users' });
+    });
+});
+
+describe('sendNotificationToUserCommentController', () => {
+    const mockRequest = (body: any): Request => ({ body } as Request);
+    const mockResponse = (): Response => {
+        const res = {} as Response;
+        res.status = jest.fn().mockReturnValue(res);
+        res.json = jest.fn().mockReturnValue(res);
+        return res;
+    };
+
+    it('should return 400 if required fields are missing', async () => {
+        // missing commentBody
+        const req = mockRequest({
+            userId: 'user1',
+            publicationId: 'pub1',
+            commentUserId: 'cuid',
+            title: 't',
+            body: 'b'
+        });
+        const res = mockResponse();
+
+        await sendNotificationToUserCommentController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(400);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Missing required fields' });
+    });
+
+    it('should send notification and return 200 on success', async () => {
+        const dto: SendNotificationDto = {
+            userId: 'user1',
+            publicationId: 'pub1',
+            commentBody: 'Nice!',
+            commentUserId: 'cuid',
+            title: 't',
+            body: 'b',
+            name: 'n'
+        };
+        const req = mockRequest(dto);
+        const res = mockResponse();
+
+        (pushService.sendNotificationToUserComment as jest.Mock).mockResolvedValueOnce(undefined);
+
+        await sendNotificationToUserCommentController(req, res);
+
+        expect(pushService.sendNotificationToUserComment).toHaveBeenCalledWith(dto);
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Notification sent to user successfully!' });
+    });
+
+    it('should return 500 if service throws', async () => {
+        const dto: SendNotificationDto = {
+            userId: 'user1',
+            publicationId: 'pub1',
+            commentBody: 'Nice!',
+            commentUserId: 'cuid',
+            title: 't',
+            body: 'b',
+            name: 'n'
+        };
+        const req = mockRequest(dto);
+        const res = mockResponse();
+
+        (pushService.sendNotificationToUserComment as jest.Mock).mockRejectedValueOnce(new Error('Error'));
+
+        await sendNotificationToUserCommentController(req, res);
+
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ message: 'Failed to send notification to user' });
     });
 });
